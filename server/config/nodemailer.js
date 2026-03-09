@@ -1,11 +1,6 @@
 require('dotenv').config();
 const nodemailer= require('nodemailer');
 
-console.log('ENV DEBUG:', {
-    user: `"${process.env.SMTP_USER}"`,
-    pass: `"${process.env.SMTP_PASS?.substring(0, 15)}..."`,
-});
-
 const transporter = nodemailer.createTransport({
     host : 'smtp-relay.brevo.com',
     port : 587,

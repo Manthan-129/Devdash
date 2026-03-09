@@ -107,6 +107,7 @@ const sendRegistrationOTP= async (req, res)=>{
 // Complete registration after OTP verification
 const verifyRegistrationOTP= async (req, res)=>{
     try{
+        console.log(req.body);
         const {email, otp, firstName, lastName, username, password}= req.body;
         if(!email || !otp || !firstName || !lastName || !username || !password){
             return res.status(400).json({success: false, message: "All fields are required"});
@@ -375,11 +376,11 @@ const forgetPasswordOTPRequest= async (req, res)=>{
 }
 
 // Verifying OTP of the forget Password Request
-const verifyForgetPasswordOTP= async (req, res)=>{
+const verifyForgetPasswordOTPAndUpdate= async (req, res)=>{
     try{
-        const {email, otp}= req.body;
-        if(!email || !otp){
-            return res.status(400).json({success: false, message: "Email and OTP are required"});
+        const {email,newPass, otp}= req.body;
+        if(!email || !otp || !newPass){
+            return res.status(400).json({success: false, message: "Email, OTP and new password are required"});
         }
 
         const user= await User.findOne({email});
@@ -398,31 +399,15 @@ const verifyForgetPasswordOTP= async (req, res)=>{
             return res.status(401).json({success: false, message: "Invalid OTP"});
          }
 
-         return res.status(200).json({success: true, message: "OTP verified successfully. You can now reset your password."});
+         // Update the user's password
+         const hashNewPassword= await bcrypt.hash(newPass, 10);
+         user.password= hashNewPassword;
+         await user.save();
+
+         return res.status(200).json({success: true, message: "OTP verified successfully. Password updated."});
     }catch(error){
         return res.status(500).json({success: false, message: "Verify Forget Password OTP Error"});
     }
 }
 
-// change password after verifying forget password OTP
-const resetPasswordAfterForgetOTP= async (req, res)=>{
-    try{
-        const {newPassword, email}= req.body;
-        if(!newPassword || !email){ 
-            return res.status(400).json({success: false, message: "Email and new password are required"});
-        }
-        const user= await User.findOne({email});
-        if(!user){
-            return res.status(404).json({success: false, message: "User not found"});
-        }
-        const hashNewPassword= await bcrypt.hash(newPassword, 10);
-        user.password= hashNewPassword;
-        await user.save();
-        return res.status(200).json({success: true, message: "Password reset successfully"});
-    }catch(error){
-        console.log("Reset password after forget OTP error:", error.message);
-        return res.status(500).json({success: false, message: "Reset Password After Forget OTP Error"});
-    }
-}
-
-module.exports= {loginUser,sendRegistrationOTP, verifyRegistrationOTP,verifyChangePasswordOTP, verifyChangePasswordOTPAndUpdate,forgetPasswordOTPRequest,verifyForgetPasswordOTP,resetPasswordAfterForgetOTP, userInfo, updateUserInfo, updateUserPassword, deleteUserAccount};
+module.exports= {loginUser,sendRegistrationOTP, verifyRegistrationOTP,verifyChangePasswordOTP, verifyChangePasswordOTPAndUpdate,forgetPasswordOTPRequest,verifyForgetPasswordOTPAndUpdate, userInfo, updateUserInfo, updateUserPassword, deleteUserAccount};
