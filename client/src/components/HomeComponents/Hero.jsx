@@ -1,8 +1,12 @@
 // Hero.jsx
-import React from 'react'
+import React, { useContext } from 'react'
 import {assets} from '../../assets/assets.js'
+import {AppContext} from '../../context/AppContext.jsx'
 
 const Hero = () => {
+
+    const {navigate}= useContext(AppContext);
+
   return (
     <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 py-20 px-4">
 
@@ -26,6 +30,8 @@ const Hero = () => {
                 </p>
             </div>
 
+
+            <button onClick={()=> navigate('/workplace')} className="flex mx-auto mb-10 px-8 py-3 bg-white text-indigo-600 text-sm font-semibold rounded-full hover:bg-cyan-300 hover:text-indigo-700 transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 cursor-pointer">Explore Our DevDash</button>
             {/* Feature Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
 
