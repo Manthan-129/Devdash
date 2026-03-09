@@ -10,9 +10,6 @@ import Notification from './pages/Settings/Notification.jsx'
 import Security from './pages/Settings/Security.jsx'
 import ForgotPassword from './pages/ForgotPassword.jsx'
 
-
-import WorkPlace from './pages/WorkPlace.jsx'
-
 import { ToastContainer } from 'react-toastify';
 
 const App = () => {
@@ -30,7 +27,6 @@ const App = () => {
           <Route path='notification' element={<Notification />}></Route>
           <Route path='security' element={<Security />}></Route>
         </Route>
-        <Route path='/workplace' element={<WorkPlace />}></Route>
       </Routes>
     </div>
   )
