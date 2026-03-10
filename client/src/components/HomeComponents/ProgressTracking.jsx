@@ -1,168 +1,102 @@
-import React from 'react'
-import { assets } from '../../assets/assets.js'
 import { Line } from 'rc-progress'
+import { assets } from '../../assets/assets.js'
+
+const members = [
+    { name: 'Sarah Chen', role: 'Team Leader', done: 11, total: 12, gradient: 'from-blue-400 to-indigo-500', color: '#10b981' },
+    { name: 'Mike Johnson', role: 'Frontend Dev', done: 7, total: 9, gradient: 'from-purple-400 to-pink-400', color: '#eab308' },
+    { name: 'Alex Kumar', role: 'Backend Dev', done: 9, total: 11, gradient: 'from-green-400 to-teal-400', color: '#10b981' },
+    { name: 'Emma Davis', role: 'UI/UX Designer', done: 10, total: 10, gradient: 'from-orange-400 to-red-400', color: '#10b981' },
+]
+
+const stats = [
+    { icon: assets.circular_batch_icon, value: '43', label: 'Active Tasks', gradient: 'from-blue-500 to-indigo-600', bg: 'from-blue-50 to-indigo-50', border: 'border-blue-100', text: 'text-blue-600' },
+    { icon: assets.growth_icon, value: '87%', label: 'Completion Rate', gradient: 'from-green-500 to-teal-600', bg: 'from-green-50 to-teal-50', border: 'border-green-100', text: 'text-green-600' },
+    { icon: assets.batch_icon, value: '12', label: 'Projects Delivered', gradient: 'from-purple-500 to-pink-600', bg: 'from-purple-50 to-pink-50', border: 'border-purple-100', text: 'text-purple-600' },
+]
 
 const ProgressTracking = () => {
   return (
-    <div className="w-full bg-white py-16 px-4">
-        <div className="max-w-7xl mx-auto">
+    <div className="w-full bg-gradient-to-b from-gray-50/50 to-white py-20 px-4 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute top-20 left-0 w-96 h-96 bg-green-100/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-0 w-80 h-80 bg-indigo-100/30 rounded-full blur-3xl"></div>
+
+        <div className="max-w-7xl mx-auto relative">
             
             {/* Section Header */}
-            <div className="text-center mb-12">
-                <div className="inline-block px-5 py-2 bg-green-100 text-green-700 text-sm font-semibold rounded-full border border-green-200 mb-4">
-                    <span>Progress Tracking</span>
-                </div>
+            <div className="text-center mb-6">
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-100/80 text-green-700 text-sm font-semibold rounded-full border border-green-200/50 mb-4">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                    Progress Tracking
+                </span>
             </div>
 
             {/* Hero Description */}
             <div className="text-center mb-16 max-w-3xl mx-auto">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
                     Real-Time Team Progress Visualization
                 </h2>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                    <span>Monitor team member progress with beautiful, intuitive progress bars. See who's ahead, who needs help, and keep projects on track.</span>
+                    Monitor team member progress with beautiful, intuitive progress bars. See who's ahead, who needs help, and keep projects on track.
                 </p>
             </div>
 
             {/* Main Progress Component */}
             <div className="mb-16">
-                <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl p-8 shadow-xl border border-gray-200">
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/50">
                     
                     {/* Header with Filters */}
                     <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-                        <div>
-                            <h2 className="text-2xl font-bold text-gray-900">Team Progress</h2>
-                        </div>
+                        <h2 className="text-2xl font-bold text-gray-900">Team Progress</h2>
                         <div className="flex gap-2">
-                            <button className="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-md">
+                            <button className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:shadow-md hover:shadow-blue-200 transition-all">
                                 This Week
                             </button>
-                            <button className="px-5 py-2 bg-white text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
+                            <button className="px-5 py-2 bg-white text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors border border-gray-200">
                                 This Month
                             </button>
                         </div>
                     </div>
 
                     {/* Progress Cards */}
-                    <div className="space-y-6">
-                        
-                        {/* Sarah Chen */}
-                        <div className="bg-white rounded-xl p-5 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center shadow-md">
-                                        <img src={assets.raw_icon} alt="raw icon" className="w-6 h-6 brightness-0 invert" />
+                    <div className="space-y-4">
+                        {members.map((m, i) => {
+                            const pct = Math.round((m.done / m.total) * 100)
+                            return (
+                                <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-12 h-12 bg-gradient-to-br ${m.gradient} rounded-xl flex items-center justify-center shadow-md`}>
+                                                <img src={assets.raw_icon} alt="" className="w-6 h-6 brightness-0 invert" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-base font-bold text-gray-900 group-hover:text-blue-700 transition-colors">{m.name}</h3> 
+                                                <p className="text-sm text-gray-500">{m.role}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <h3 className="text-2xl font-bold" style={{ color: m.color }}>{pct}%</h3>
+                                            <p className="text-sm text-gray-500">
+                                                <span className="font-semibold">{m.done}/{m.total}</span> tasks
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-base font-bold text-gray-900">Sarah Chen</h3> 
-                                        <p className="text-sm text-gray-600">Team Leader</p>
-                                    </div>
+                                    <Line 
+                                        strokeWidth={1} 
+                                        percent={pct} 
+                                        strokeColor={m.color}
+                                        trailColor="#f3f4f6"
+                                        className="rounded-full"
+                                    />
                                 </div>
-                                <div className="text-right">
-                                    <h3 className="text-2xl font-bold text-green-600">92%</h3>
-                                    <p className="text-sm text-gray-600">
-                                        <span className="font-semibold">11/12</span> tasks
-                                    </p>
-                                </div>
-                            </div>
-                            <Line 
-                                strokeWidth={1} 
-                                percent={(11/12)*100} 
-                                strokeColor="#10b981"
-                                trailColor="#e5e7eb"
-                                className="rounded-full"
-                            />
-                        </div>
-
-                        {/* Mike Johnson */}
-                        <div className="bg-white rounded-xl p-5 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center shadow-md">
-                                        <img src={assets.raw_icon} alt="raw icon" className="w-6 h-6 brightness-0 invert" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-base font-bold text-gray-900">Mike Johnson</h3> 
-                                        <p className="text-sm text-gray-600">Frontend Dev</p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <h3 className="text-2xl font-bold text-yellow-600">78%</h3>
-                                    <p className="text-sm text-gray-600">
-                                        <span className="font-semibold">7/9</span> tasks
-                                    </p>
-                                </div>
-                            </div>
-                            <Line 
-                                strokeWidth={1} 
-                                percent={(7/9)*100} 
-                                strokeColor="#eab308"
-                                trailColor="#e5e7eb"
-                                className="rounded-full"
-                            />
-                        </div>
-
-                        {/* Alex Kumar */}
-                        <div className="bg-white rounded-xl p-5 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-400 rounded-full flex items-center justify-center shadow-md">
-                                        <img src={assets.raw_icon} alt="raw icon" className="w-6 h-6 brightness-0 invert" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-base font-bold text-gray-900">Alex Kumar</h3> 
-                                        <p className="text-sm text-gray-600">Backend Dev</p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <h3 className="text-2xl font-bold text-green-600">85%</h3>
-                                    <p className="text-sm text-gray-600">
-                                        <span className="font-semibold">9/11</span> tasks
-                                    </p>
-                                </div>
-                            </div>
-                            <Line 
-                                strokeWidth={1} 
-                                percent={(9/11)*100} 
-                                strokeColor="#10b981"
-                                trailColor="#e5e7eb"
-                                className="rounded-full"
-                            />
-                        </div>
-
-                        {/* Emma Davis */}
-                        <div className="bg-white rounded-xl p-5 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-400 rounded-full flex items-center justify-center shadow-md">
-                                        <img src={assets.raw_icon} alt="raw icon" className="w-6 h-6 brightness-0 invert" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-base font-bold text-gray-900">Emma Davis</h3> 
-                                        <p className="text-sm text-gray-600">UI/UX Designer</p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <h3 className="text-2xl font-bold text-green-600">95%</h3>
-                                    <p className="text-sm text-gray-600">
-                                        <span className="font-semibold">10/10</span> tasks
-                                    </p>
-                                </div>
-                            </div>
-                            <Line 
-                                strokeWidth={1} 
-                                percent={(10/10)*100} 
-                                strokeColor="#10b981"
-                                trailColor="#e5e7eb"
-                                className="rounded-full"
-                            />
-                        </div>
+                            )
+                        })}
 
                         {/* Overall Team Progress */}
-                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 shadow-lg text-white">
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 shadow-lg shadow-blue-600/20 text-white">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="bg-white/20 p-2.5 rounded-lg">
-                                    <img src={assets.batch_icon} alt="batch icon" className="w-6 h-6 brightness-0 invert" />
+                                <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                                    <img src={assets.batch_icon} alt="" className="w-6 h-6 brightness-0 invert" />
                                 </div>
                                 <h3 className="text-xl font-bold">Overall Team Progress</h3> 
                             </div>
@@ -191,37 +125,17 @@ const ProgressTracking = () => {
 
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 text-center shadow-md border border-blue-100 hover:shadow-lg transition-shadow">
-                    <div className="flex justify-center mb-4">
-                        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-4 rounded-full shadow-lg">
-                            <img src={assets.circular_batch_icon} alt="circular_batch_icon" className="w-10 h-10 brightness-0 invert" />
+                {stats.map((s, i) => (
+                    <div key={i} className={`bg-gradient-to-br ${s.bg} rounded-2xl p-8 text-center shadow-sm border ${s.border} hover:shadow-lg hover:-translate-y-1 transition-all duration-200`}>
+                        <div className="flex justify-center mb-4">
+                            <div className={`bg-gradient-to-br ${s.gradient} p-4 rounded-2xl shadow-lg`}>
+                                <img src={s.icon} alt="" className="w-10 h-10 brightness-0 invert" />
+                            </div>
                         </div>
+                        <h2 className={`text-5xl font-extrabold ${s.text} mb-2`}>{s.value}</h2>
+                        <h3 className="text-lg font-semibold text-gray-700">{s.label}</h3>
                     </div>
-                    <h2 className="text-5xl font-bold text-blue-600 mb-2">43</h2>
-                    <h3 className="text-lg font-semibold text-gray-700">Active Tasks</h3>
-                </div>
-
-                <div className="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-8 text-center shadow-md border border-green-100 hover:shadow-lg transition-shadow">
-                    <div className="flex justify-center mb-4">
-                        <div className="bg-gradient-to-br from-green-500 to-teal-600 p-4 rounded-full shadow-lg">
-                            <img src={assets.growth_icon} alt="growth icon" className="w-10 h-10 brightness-0 invert" />
-                        </div>
-                    </div>
-                    <h2 className="text-5xl font-bold text-green-600 mb-2">87%</h2>
-                    <h3 className="text-lg font-semibold text-gray-700">Completion Rate</h3>
-                </div>
-
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-8 text-center shadow-md border border-purple-100 hover:shadow-lg transition-shadow">
-                    <div className="flex justify-center mb-4">
-                        <div className="bg-gradient-to-br from-purple-500 to-pink-600 p-4 rounded-full shadow-lg">
-                            <img src={assets.batch_icon} alt="batch icon" className="w-10 h-10 brightness-0 invert" />
-                        </div>
-                    </div>
-                    <h2 className="text-5xl font-bold text-purple-600 mb-2">12</h2>
-                    <h3 className="text-lg font-semibold text-gray-700">Projects Delivered</h3>
-                </div>
-
+                ))}
             </div>
 
         </div>

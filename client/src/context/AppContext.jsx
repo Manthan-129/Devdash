@@ -1,7 +1,6 @@
-import React, {useEffect, useState} from 'react'   
-import {createContext} from 'react'
-import {useNavigate} from 'react-router-dom'
-import axios from 'axios'
+import axios from 'axios';
+import { createContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 export const AppContext= createContext();
@@ -20,12 +19,10 @@ export const AppContextProvider= (props)=>{
             if(response.data.success){
                 setUser(response.data.user);
             }else{
-                console.log("Failed to fetch user data");
                 toast.error(response.data.message);
             }
         }catch(error){
-            console.log("Error fetching user data:", error);
-            toast.error(error.message);
+            toast.error(error.response?.data?.message || 'Failed to fetch user data');
         }
     }
 

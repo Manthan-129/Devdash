@@ -226,7 +226,7 @@ const teamInvitationTemplate = ({
   `,
 });
 
-const taskAssginmentTemplate= ({title, description, status, priority, dueDate, assignedBy})=> ({
+const taskAssignmentTemplate= ({title, description, status, priority, dueDate, assignedBy})=> ({
     subject: `New Task Assigned: ${title}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
@@ -266,5 +266,35 @@ const taskAssginmentTemplate= ({title, description, status, priority, dueDate, a
     `,
 });     
 
+const pullRequestTemplate= ({taskTitle, senderName, githubPRLink, message})=> ({
+    subject: `Pull Request Submitted: ${taskTitle}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
+        <h3>New Pull Request</h3>
+        <p><strong>${senderName}</strong> has submitted a pull request for the task <strong>"${taskTitle}"</strong>.</p>
+        <p><strong>GitHub PR Link:</strong> <a href="${githubPRLink}" style="color: #2563eb;">${githubPRLink}</a></p>
+        ${message ? `<p><strong>Message:</strong> ${message}</p>` : ''}
+        <p style="margin-top: 20px;">Please review the pull request on GitHub and update the status in DevDash.</p>
+        <p style="font-size: 13px; color: #777;">This is an automated notification.</p>
+        <hr style="border: none; border-top: 1px solid #eee;" />
+        <p style="font-size: 12px; color: #999;">© ${new Date().getFullYear()} DevDash</p>
+      </div>
+    `,
+});
 
-module.exports= {forgetPasswordTemplate, registrationTemplate, changePasswordRequest, updateTaskTemplate, teamInvitationTemplate, taskAssginmentTemplate};
+const pullRequestReviewTemplate= ({taskTitle, reviewerName, status, reviewNote})=> ({
+    subject: `Pull Request ${status === 'accepted' ? 'Accepted' : 'Rejected'}: ${taskTitle}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
+        <h3>Pull Request ${status === 'accepted' ? 'Accepted' : 'Rejected'}</h3>
+        <p>Your pull request for <strong>"${taskTitle}"</strong> has been <strong>${status}</strong> by <strong>${reviewerName}</strong>.</p>
+        ${reviewNote ? `<p><strong>Review Note:</strong> ${reviewNote}</p>` : ''}
+        ${status === 'rejected' ? '<p>Please make the required changes and submit a new pull request.</p>' : '<p>Great work! The task has been marked as completed.</p>'}
+        <p style="font-size: 13px; color: #777;">This is an automated notification.</p>
+        <hr style="border: none; border-top: 1px solid #eee;" />
+        <p style="font-size: 12px; color: #999;">© ${new Date().getFullYear()} DevDash</p>
+      </div>
+    `,
+});
+
+module.exports= {forgetPasswordTemplate, registrationTemplate, changePasswordRequest, updateTaskTemplate, teamInvitationTemplate, taskAssignmentTemplate, pullRequestTemplate, pullRequestReviewTemplate};

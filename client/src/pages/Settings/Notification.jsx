@@ -1,3 +1,4 @@
+import { Bell, ClipboardList, GitPullRequest, RefreshCw, UserPlus } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 
 const Notification = () => {
@@ -5,7 +6,7 @@ const Notification = () => {
   const [notifications, setNotifications] = useState({
     taskAssignments: false,
     taskUpdates: false,
-    mergeRequests: false,
+    pullRequests: false,
     teamInvitations: false,
   });
 
@@ -17,7 +18,6 @@ const Notification = () => {
 
   const fetchNotificationData = async () => {
     // Fetch existing notification settings from backend (not implemented)
-    // setNotifications(data);
   }
 
   useEffect(() => {
@@ -28,22 +28,34 @@ const Notification = () => {
     {
       key: 'taskAssignments',
       title: 'Task Assignments',
-      description: 'Notify me when I am assigned a new task.'
+      description: 'Notify me when I am assigned a new task.',
+      icon: ClipboardList,
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600',
     },
     {
       key: 'taskUpdates',
       title: 'Task Updates',
-      description: 'Notify me about updates on my tasks.'
+      description: 'Notify me about status changes on my tasks.',
+      icon: RefreshCw,
+      iconBg: 'bg-amber-100',
+      iconColor: 'text-amber-600',
     },
     {
-      key: 'mergeRequests',
-      title: 'Merge Requests',
-      description: 'Notify me when there are new merge requests.'
+      key: 'pullRequests',
+      title: 'Pull Requests',
+      description: 'Notify me when a pull request needs review.',
+      icon: GitPullRequest,
+      iconBg: 'bg-purple-100',
+      iconColor: 'text-purple-600',
     },
     {
       key: 'teamInvitations',
       title: 'Team Invitations',
-      description: 'Notify me when I receive a team invitation.'
+      description: 'Notify me when I receive a team invitation.',
+      icon: UserPlus,
+      iconBg: 'bg-emerald-100',
+      iconColor: 'text-emerald-600',
     },
   ]
 
@@ -52,59 +64,81 @@ const Notification = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        {/* Header */}
-        <div className="p-8 bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-gray-200">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Email Notification
-          </h2>
-          <p className="text-gray-600 mt-2">Manage your email notification preferences.</p>
+    <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
+
+      {/* Page Header */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
+        <p className="text-sm text-gray-500 mt-1">Manage your email notification preferences.</p>
+      </div>
+
+      {/* Notification Card */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-50">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-sm">
+            <Bell size={18} className="text-white" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-gray-800">Email Notifications</h3>
+            <p className="text-xs text-gray-400">Choose what events trigger email notifications.</p>
+          </div>
         </div>
 
-        {/* Manage notifications */}
-        <div className="divide-y divide-gray-100">
-          {notificationItems.map((item, index) => (
-            <div 
-              key={index}
-              className="p-6 flex items-center justify-between hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-300 group"
-            >
-              <div className="flex-1 pr-6">
-                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-cyan-600 transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-gray-500 mt-1 leading-relaxed">
-                  {item.description}
-                </p>
-              </div>
-
-              {/* Toggle Button */}
-              <button 
-                onClick={() => handleToggle(item.key)}
-                className={`relative inline-flex h-11 w-20 flex-shrink-0 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-offset-2 ${
-                  notifications[item.key] 
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 focus:ring-blue-300 shadow-lg shadow-blue-500/30' 
-                    : 'bg-gray-300 focus:ring-gray-200'
-                }`}
+        <div className="divide-y divide-gray-50">
+          {notificationItems.map((item) => {
+            const ItemIcon = item.icon;
+            return (
+              <div 
+                key={item.key}
+                className="flex items-center gap-4 px-6 py-5 hover:bg-gray-50/50 transition-colors group"
               >
-                <span
-                  className={`inline-block h-8 w-8 transform rounded-full bg-white shadow-lg transition-transform duration-300 ${
-                    notifications[item.key] ? 'translate-x-10' : 'translate-x-1'
+                <div className={`w-10 h-10 rounded-xl ${item.iconBg} flex items-center justify-center flex-shrink-0`}>
+                  <ItemIcon size={18} className={item.iconColor} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-bold text-gray-800 group-hover:text-blue-700 transition-colors">{item.title}</h4>
+                  <p className="text-xs text-gray-400 mt-0.5">{item.description}</p>
+                </div>
+
+                {/* Toggle */}
+                <button 
+                  onClick={() => handleToggle(item.key)}
+                  className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full transition-all cursor-pointer ${
+                    notifications[item.key] 
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500 shadow-sm shadow-blue-200' 
+                      : 'bg-gray-200'
                   }`}
-                />
-              </button>
-            </div>
-          ))}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                      notifications[item.key] ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Save Button */}
-        <div className="p-6 bg-gradient-to-r from-gray-50 to-transparent border-t border-gray-200">
+        {/* Save */}
+        <div className="px-6 py-5 border-t border-gray-50">
           <button 
             onClick={() => handleSaveNotifications()}
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold py-4 px-6 rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-blue-300"
+            className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-xl hover:shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
           >
-            Save Notification Preferences
+            Save Preferences
           </button>
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-5 flex items-start gap-4">
+        <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <Bell size={18} className="text-blue-600" />
+        </div>
+        <div>
+          <h4 className="text-sm font-bold text-gray-800 mb-1">About Notifications</h4>
+          <p className="text-xs text-gray-500 leading-relaxed">Email notifications are sent to your registered email address. You can change these preferences at any time.</p>
         </div>
       </div>
     </div>

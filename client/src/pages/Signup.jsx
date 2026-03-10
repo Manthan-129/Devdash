@@ -1,12 +1,11 @@
-import React from 'react'
-import {useContext, useState} from 'react'
-import {X} from 'lucide-react'
-import {AppContext} from '../context/AppContext.jsx'
-import {useForm} from 'react-hook-form'
 import axios from 'axios'
-import {toast} from 'react-toastify'
+import { X } from 'lucide-react'
+import { useContext, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
+import { assets } from '../assets/assets.js'
 import OTP from '../components/OTP.jsx'
-import {assets} from '../assets/assets.js'
+import { AppContext } from '../context/AppContext.jsx'
 
 const Signup = () => {
 
@@ -19,8 +18,6 @@ const Signup = () => {
     const password = watch("password");
 
     const onSubmit= async (data)=>{
-        
-        console.log(data);
         setFormData(data);
         try{
             const responseOTP= await axios.post(backendUrl + '/api/auth/send-registration-otp', {email: data.email, username: data.username});
@@ -30,8 +27,7 @@ const Signup = () => {
                 toast.error(responseOTP.data.message);
             }
         }catch(error){
-            toast.error(error.response.data.message);
-            console.log(error.response.data.message);
+            toast.error(error.response?.data?.message || 'Failed to send OTP');
         }
     }
     
@@ -42,18 +38,14 @@ const Signup = () => {
             if(response.data.success){
                 setOpenOTP(false);
                 setOtp('');
-                console.log("Login successful");
-                console.log("Received token:", response.data.token);
                 setToken(response.data.token);
                 localStorage.setItem('token', response.data.token);
                 navigate('/');
             }else{
                 toast.error(response.data.message);
-                console.log("Login failed:", response.data.message);
             }
         }catch(error){
-            console.log(error.response.data.message);
-            toast.error(error.response.data.message);
+            toast.error(error.response?.data?.message || 'Registration failed');
         }
     }
 
@@ -62,247 +54,161 @@ const Signup = () => {
         setOtp(otpValue);
     }
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50 px-4 py-6 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-200/20 rounded-full blur-3xl"></div>
 
+        <div className="w-full max-w-2xl bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8 relative z-10">
 
-        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-
-
-            <div className="mb-5">
-
-                <h2 className="text-2xl font-semibold text-gray-900 mb-1">Create Account</h2>
-
-                <p className="text-gray-500 text-sm">Signup to get started</p>
-
-            </div>
-
-
-            {/* Error Message */}
-            {errors.Message && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-
-                    <p className="text-sm text-red-500">
-                        {errors.Message.message}
-                    </p>
-
+            <div className="mb-6 text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-100/80 text-blue-700 text-xs font-bold rounded-full border border-blue-200/50 mb-3 uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                    Join DevDash
                 </div>
-
-            )}
-
+                <h2 className="text-2xl font-extrabold text-gray-900 mb-1">Create Account</h2>
+                <p className="text-gray-500 text-sm">Sign up to start managing your projects</p>
+            </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-
                 {/* Name div */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-
-                    {/* First Name div */}
                     <div>
-
-                        <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                            First Name
-                        </label>
-
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">First Name</label>
                         <input 
                             type="text" 
                             {...register("firstName" ,{required: "First name is required"})} 
                             placeholder="Enter your first name"
-                            className="w-full h-10 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                            className="w-full h-11 px-4 border border-gray-200 rounded-xl bg-gray-50/50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
                         />
-
-                        {errors.firstName && (
-                            <p className="text-xs text-red-500 mt-1">{errors.firstName.message}</p>
-
-                        )}
-
+                        {errors.firstName && <p className="text-xs text-red-500 mt-1">{errors.firstName.message}</p>}
                     </div>
-
-
-                    {/* Last Name div */}
                     <div>
-
-                        <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                            Last Name
-                        </label>
-
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Last Name</label>
                         <input 
                             type="text" 
                             {...register("lastName" ,{required: "Last name is required"})} 
                             placeholder="Enter your last name"
-                            className="w-full h-10 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                            className="w-full h-11 px-4 border border-gray-200 rounded-xl bg-gray-50/50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
                         />
-
-                        {errors.lastName && (
-                            <p className="text-xs text-red-500 mt-1">{errors.lastName.message}</p>
-
-                        )}
-
+                        {errors.lastName && <p className="text-xs text-red-500 mt-1">{errors.lastName.message}</p>}
                     </div>
-
-
                 </div>
-                
 
-                {/* Username div */}
+                {/* Username */}
                 <div>
-
-                    <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                        Username
-                    </label>
-
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Username</label>
                     <input 
                         type="text" 
                         {...register("username" ,{required: "Username is required"})} 
-                        placeholder="Enter your username"
-                        className="w-full h-10 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                        placeholder="Choose a username"
+                        className="w-full h-11 px-4 border border-gray-200 rounded-xl bg-gray-50/50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
                     />
-
-                    {errors.username && (
-                        <p className="text-xs text-red-500 mt-1">{errors.username.message}</p>
-
-                    )}
-
+                    {errors.username && <p className="text-xs text-red-500 mt-1">{errors.username.message}</p>}
                 </div>
 
-                {/* Email div */}
+                {/* Email */}
                 <div>
-
-                    <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                        Email Address
-                    </label>
-
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
                     <input 
                         type="email" 
                         {...register("email" ,{required: "Email is required", pattern: {value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "Invalid email address"}})} 
                         placeholder="Enter your email address"
-                        className="w-full h-10 px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                        className="w-full h-11 px-4 border border-gray-200 rounded-xl bg-gray-50/50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
                     />
-
-                    {errors.email && (
-                        <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
-
-                    )}
-
+                    {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
                 </div>
 
-
-                {/* Password div */}
+                {/* Password */}
                 <div>
-
-                    <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                        Password
-                    </label>
-
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
                     <div className="relative">
                         <input 
                             type={showPass ? "text" : "password"}
                             {...register("password" ,{required: "Password is required", minLength: {value: 8, message: "Password must be at least 8 characters"}})} 
-                            placeholder="Enter your password"
-                            className="w-full h-10 px-3 pr-10 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                            placeholder="Create a password"
+                            className="w-full h-11 px-4 pr-11 border border-gray-200 rounded-xl bg-gray-50/50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
                         />
-                        <button onClick={()=> setShowPass(!showPass)} type="button" className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer opacity-60 hover:opacity-100 transition-opacity">{showPass ? <img src={assets.close_eye_icon} alt="Toggle Password Visibility" className="w-5 h-5"  /> : <img src={assets.open_eye_icon} alt="Toggle Password Visibility" className="w-5 h-5" />}</button>
+                        <button onClick={()=> setShowPass(!showPass)} type="button" className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer opacity-60 hover:opacity-100 transition-opacity">{showPass ? <img src={assets.close_eye_icon} alt="" className="w-5 h-5" /> : <img src={assets.open_eye_icon} alt="" className="w-5 h-5" />}</button>
                     </div>
-
-                    {errors.password && (
-                        <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>
-
-                    )}
-
+                    {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>}
                 </div>
 
-
-                {/* Confirm Password div */}
+                {/* Confirm Password */}
                 <div>
-
-                    <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                        Confirm Password
-                    </label>
-
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Confirm Password</label>
                     <div className="relative">
                         <input 
                             type={showPass ? "text" : "password"}
-                            {...register("confirmPassword" ,{required: "Please confirm your password", validate: value=> value=== password || 'Password do not match'})} 
+                            {...register("confirmPassword" ,{required: "Please confirm your password", validate: value=> value=== password || 'Passwords do not match'})} 
                             placeholder="Confirm your password"
-                            className="w-full h-10 px-3 pr-10 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                            className="w-full h-11 px-4 pr-11 border border-gray-200 rounded-xl bg-gray-50/50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
                         />
-                        <button onClick={()=> setShowPass(!showPass)} type="button" className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer opacity-60 hover:opacity-100 transition-opacity">{showPass ? <img src={assets.close_eye_icon} alt="Toggle Password Visibility" className="w-5 h-5"  /> : <img src={assets.open_eye_icon} alt="Toggle Password Visibility" className="w-5 h-5" />}</button>
+                        <button onClick={()=> setShowPass(!showPass)} type="button" className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer opacity-60 hover:opacity-100 transition-opacity">{showPass ? <img src={assets.close_eye_icon} alt="" className="w-5 h-5" /> : <img src={assets.open_eye_icon} alt="" className="w-5 h-5" />}</button>
                     </div>
-
-                    {errors.confirmPassword && (
-                        <p className="text-xs text-red-500 mt-1">{errors.confirmPassword.message}</p>
-
-                    )}
+                    {errors.confirmPassword && <p className="text-xs text-red-500 mt-1">{errors.confirmPassword.message}</p>}
                 </div>
 
+                {/* Submit */}
+                <button 
+                    type="submit"
+                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5 active:translate-y-0 text-white text-sm font-bold rounded-xl transition-all cursor-pointer"
+                >
+                    Sign Up
+                </button>
+            </form>
 
-                {/* Submit button div */}
-                <div>
-
-                    <button 
-                        type="submit"
-                        className="w-full h-10 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all hover:shadow-md cursor-pointer"
+            <div className="text-center mt-6">
+                <p className="text-sm text-gray-500">
+                    Already have an account?
+                    <span 
+                        onClick={()=> navigate('/login')}
+                        className="text-blue-600 font-semibold cursor-pointer hover:text-blue-700 hover:underline ml-1"
                     >
-                        Sign Up
-                    </button>
-
-                </div>
-                </form>
-                
-
-
-                {/* Paragraph Link */}
-                <div className="text-center mt-5">
-
-                    <p className="text-sm text-gray-500">
-                        Already have an account? 
-                        <span 
-                            onClick={()=> navigate('/login')}
-                            className="text-blue-500 font-medium cursor-pointer hover:text-blue-700 hover:underline ml-1"
-                        >
-                            Login here
-                        </span>
-                    </p>
-
-                </div>
-
-
+                        Login here
+                    </span>
+                </p>
+            </div>
         </div>
         
+        {/* OTP Modal */}
         {openOTP && 
+            <div 
+                onClick={()=> setOpenOTP(false)}
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4 animate-fadeIn"
+            >
                 <div 
-                    onClick={()=> setOpenOTP(false)}
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+                    onClick={(e)=> e.stopPropagation()}
+                    className="bg-white rounded-2xl shadow-2xl p-7 w-full max-w-md border border-gray-100"
                 >
-                    <div 
-                        onClick={(e)=> e.stopPropagation()}
-                        className="bg-white border border-gray-200 rounded-2xl shadow-xl p-7 w-full max-w-md"
-                    >
-                        <div className="flex justify-between items-center mb-5">
-                            <h2 className="text-lg font-semibold text-gray-900">Enter OTP</h2>
-                            <button 
-                                onClick={()=>setOpenOTP(false)}
-                                className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
-                            >
-                                <X size={14} strokeWidth={2} />
-                            </button>
+                    <div className="flex justify-between items-center mb-5">
+                        <div>
+                            <h2 className="text-lg font-bold text-gray-900">Verify Your Email</h2>
+                            <p className="text-xs text-gray-500 mt-0.5">Enter the 6-digit OTP sent to your email</p>
                         </div>
-                        
-                        <form onSubmit={verifyOTP} className="space-y-4">
-                            <OTP value={otp} onChange={handleOTPChange} />
-                            <button 
-                                type="submit"
-                                className="w-full h-10 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all hover:shadow-md cursor-pointer"
-                            >
-                                Verify OTP
-                            </button>
-                        </form>
+                        <button 
+                            onClick={()=>setOpenOTP(false)}
+                            className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                        >
+                            <X size={14} strokeWidth={2} />
+                        </button>
                     </div>
+                    
+                    <form onSubmit={verifyOTP} className="space-y-4">
+                        <OTP value={otp} onChange={handleOTPChange} />
+                        <button 
+                            type="submit"
+                            className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-lg hover:shadow-blue-200 text-white text-sm font-bold rounded-xl transition-all cursor-pointer"
+                        >
+                            Verify & Create Account
+                        </button>
+                    </form>
                 </div>
-            }
+            </div>
+        }
 
     </div>
-
   )
 }
 
