@@ -16,7 +16,7 @@ const stats = [
 
 const ProgressTracking = () => {
   return (
-    <div className="w-full bg-gradient-to-b from-gray-50/50 to-white py-20 px-4 relative overflow-hidden">
+    <div id="tracking" className="w-full bg-gradient-to-b from-gray-50/50 to-white py-20 px-4 relative overflow-hidden">
         {/* Background decorations */}
         <div className="absolute top-20 left-0 w-96 h-96 bg-green-100/30 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-0 w-80 h-80 bg-indigo-100/30 rounded-full blur-3xl"></div>

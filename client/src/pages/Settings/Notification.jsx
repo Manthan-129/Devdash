@@ -1,5 +1,5 @@
-import { Bell, ClipboardList, GitPullRequest, RefreshCw, UserPlus } from 'lucide-react'
-import React, { useState, useEffect } from 'react'
+import { Bell, ClipboardList, GitPullRequest, RefreshCw, UserPlus } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const Notification = () => {
   

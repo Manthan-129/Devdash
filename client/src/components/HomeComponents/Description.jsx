@@ -2,7 +2,7 @@ import { assets } from '../../assets/assets.js'
 
 const Description = () => {
   return (
-    <div className="w-full bg-gradient-to-b from-gray-50 to-white py-20 px-4 overflow-hidden">
+    <div id="features" className="w-full bg-gradient-to-b from-gray-50 to-white py-20 px-4 overflow-hidden">
         <div className="max-w-7xl mx-auto">
             {/* Hero Section */}
             <div className="text-center mb-16">

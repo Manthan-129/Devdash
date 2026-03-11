@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { assets } from '../../assets/assets.js'
-import { useForm } from 'react-hook-form'
-import { AppContext } from '../../context/AppContext'
 import axios from 'axios'
-import { toast } from 'react-toastify';
+import { useContext, useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
+import { assets } from '../../assets/assets.js'
+import { AppContext } from '../../context/AppContext'
 
 const Profile = () => {
     const { user, navigate, backendUrl, token, setUser } = useContext(AppContext);

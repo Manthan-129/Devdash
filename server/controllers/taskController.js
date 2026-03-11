@@ -1,7 +1,7 @@
 const Team= require('../models/team.js');
 const Task= require('../models/Task.js');
 const {transporter}= require('../config/nodemailer.js');
-const {updateTaskTemplate, taskAssginmentTemplate}= require('../utils/emailTemplates.js');
+const {updateTaskTemplate, taskAssignmentTemplate}= require('../utils/emailTemplates.js');
 
 // Task Model
 const createTask= async (req, res)=>{
@@ -32,18 +32,10 @@ const createTask= async (req, res)=>{
             return res.status(400).json({success: false, message: "Assigned user must be a member of the team"});
         }
 
-        // is Team leader
+        // Admin cannot assign task to the team leader
         const isMemberLeader= team.leader.toString() === assignedTo;
         if(isAdmin && isMemberLeader){
-             return res.status(400).json({success: false, message: "User cannot assigned task to the team leader"});
-        }
-        
-        // is Team Admin
-        const isMemberAdmin= team.members.some(member=> member.user.toString() === assignedTo && member.role === 'admin');
-
-        // Admin cannot assign task to another admin
-        if(isAdmin && isMemberAdmin){
-            return res.status(400).json({success: false, message: "Admin cannot assigned task to another admin"});
+             return res.status(403).json({success: false, message: "Admin cannot assign task to the team leader"});
         }
         
         const newTask= new Task({
@@ -65,8 +57,8 @@ const createTask= async (req, res)=>{
         const mailOptions= {
             from: `"Support" <${process.env.SENDER_EMAIL}>`,
             to: newTask.assignedTo.email,
-            subject: taskAssginmentTemplate({title: newTask.title, description: newTask.description, status: newTask.status, priority: newTask.priority, dueDate: newTask.dueDate, assignedBy: newTask.assignedBy.firstName + ' ' + newTask.assignedBy.lastName}).subject,
-            text: taskAssginmentTemplate({title: newTask.title, description: newTask.description, status: newTask.status, priority: newTask.priority, dueDate: newTask.dueDate, assignedBy: newTask.assignedBy.firstName + ' ' + newTask.assignedBy.lastName}).html.replace(/<[^>]+>/g, ''),
+            subject: taskAssignmentTemplate({title: newTask.title, description: newTask.description, status: newTask.status, priority: newTask.priority, dueDate: newTask.dueDate, assignedBy: newTask.assignedBy.firstName + ' ' + newTask.assignedBy.lastName}).subject,
+            text: taskAssignmentTemplate({title: newTask.title, description: newTask.description, status: newTask.status, priority: newTask.priority, dueDate: newTask.dueDate, assignedBy: newTask.assignedBy.firstName + ' ' + newTask.assignedBy.lastName}).html.replace(/<[^>]+>/g, ''),
         }
 
         await transporter.sendMail(mailOptions);

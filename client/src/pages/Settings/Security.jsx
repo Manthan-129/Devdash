@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react'
+import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react'
 import { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'

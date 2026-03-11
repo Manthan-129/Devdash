@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { AlertCircle, ArrowLeft, BarChart3, CalendarDays, CheckCircle2, ClipboardList, Clock, Crown, ExternalLink, Filter, Flame, FolderKanban, GitPullRequest, Medal, Plus, Shield, Sparkles, Target, Timer, TrendingUp, Trophy, UserMinus, UserPlus, Users, X, Zap } from 'lucide-react'
+import { AlertCircle, ArrowLeft, ArrowRightLeft, BarChart3, CalendarDays, CheckCircle2, ClipboardList, Clock, Crown, ExternalLink, Filter, Flame, FolderKanban, GitPullRequest, Medal, Plus, Shield, Sparkles, Target, Timer, TrendingUp, Trophy, UserMinus, UserPlus, Users, X, Zap } from 'lucide-react'
 import { useContext, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -53,6 +53,11 @@ const TeamDetail = () => {
     const [pullRequests, setPullRequests] = useState([]);
     const [reviewingPR, setReviewingPR] = useState(null);
     const [reviewNote, setReviewNote] = useState('');
+
+    // Transfer leadership
+    const [showTransferModal, setShowTransferModal] = useState(false);
+    const [transferTarget, setTransferTarget] = useState(null);
+    const [transferring, setTransferring] = useState(false);
 
     // Progress report
     const [progressData, setProgressData] = useState(null);
@@ -246,6 +251,24 @@ const TeamDetail = () => {
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to change role');
         }
+    };
+
+    // Transfer leadership
+    const handleTransferLeadership = async () => {
+        if (!transferTarget) return;
+        setTransferring(true);
+        try {
+            const res = await axios.put(backendUrl + `/api/team/${teamId}/transfer-leadership/${transferTarget._id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+            if (res.data.success) {
+                toast.success(res.data.message);
+                setShowTransferModal(false);
+                setTransferTarget(null);
+                fetchTeam();
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to transfer leadership');
+        }
+        setTransferring(false);
     };
 
     // Remove member
@@ -474,6 +497,9 @@ const TeamDetail = () => {
                                         <option value="member">Member</option>
                                         <option value="admin">Admin</option>
                                     </select>
+                                    <button onClick={() => { setTransferTarget(m.user); setShowTransferModal(true); }} className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-xl transition-colors cursor-pointer" title="Transfer Leadership">
+                                        <ArrowRightLeft size={14} />
+                                    </button>
                                     <button onClick={() => removeMember(m.user?._id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer">
                                         <UserMinus size={14} />
                                     </button>
@@ -874,6 +900,32 @@ const TeamDetail = () => {
                             </button>
                         </div>
                     </form>
+                </Modal>
+            )}
+
+            {/* Transfer Leadership Modal */}
+            {showTransferModal && transferTarget && (
+                <Modal onClose={() => { setShowTransferModal(false); setTransferTarget(null); }} title="Transfer Leadership" icon={<ArrowRightLeft size={18} className="text-yellow-600" />}>
+                    <div className="space-y-4">
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                            <p className="text-sm text-yellow-800 font-medium mb-1">Are you sure?</p>
+                            <p className="text-xs text-yellow-700">You are about to transfer leadership to <span className="font-bold">{transferTarget.firstName} {transferTarget.lastName}</span> (@{transferTarget.username}). You will become an admin after this action.</p>
+                        </div>
+                        <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
+                            <img src={transferTarget.profilePicture || `https://ui-avatars.com/api/?name=${transferTarget.firstName}+${transferTarget.lastName}&background=6366f1&color=fff`} alt="" className="w-10 h-10 rounded-xl object-cover ring-2 ring-gray-100" />
+                            <div>
+                                <p className="text-sm font-bold text-gray-900">{transferTarget.firstName} {transferTarget.lastName}</p>
+                                <p className="text-xs text-gray-500">@{transferTarget.username}</p>
+                            </div>
+                            <Crown size={16} className="text-yellow-500 ml-auto" />
+                        </div>
+                        <div className="flex gap-3 pt-2">
+                            <button type="button" onClick={() => { setShowTransferModal(false); setTransferTarget(null); }} className="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors cursor-pointer">Cancel</button>
+                            <button type="button" onClick={handleTransferLeadership} disabled={transferring} className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-yellow-500 to-amber-600 rounded-xl hover:shadow-md disabled:opacity-50 transition-all cursor-pointer">
+                                {transferring ? 'Transferring...' : 'Confirm Transfer'}
+                            </button>
+                        </div>
+                    </div>
                 </Modal>
             )}
         </div>

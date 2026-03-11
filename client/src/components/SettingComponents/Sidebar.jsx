@@ -1,6 +1,6 @@
-import React, { useContext } from 'react'
-import { NavLink } from 'react-router-dom'
 import { ArrowLeft, Bell, ChevronRight, Lock, LogOut, Sparkles, User } from 'lucide-react'
+import { useContext } from 'react'
+import { NavLink } from 'react-router-dom'
 import { AppContext } from '../../context/AppContext.jsx'
 
 const Sidebar = () => {
