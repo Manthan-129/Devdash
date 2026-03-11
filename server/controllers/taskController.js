@@ -1,6 +1,6 @@
 const Team= require('../models/team.js');
 const Task= require('../models/Task.js');
-const transporter= require('../config/nodemailer.js');
+const {transporter}= require('../config/nodemailer.js');
 const {updateTaskTemplate, taskAssignmentTemplate}= require('../utils/emailTemplates.js');
 
 // Task Model
@@ -32,18 +32,10 @@ const createTask= async (req, res)=>{
             return res.status(400).json({success: false, message: "Assigned user must be a member of the team"});
         }
 
-        // is Team leader
+        // Admin cannot assign task to the team leader
         const isMemberLeader= team.leader.toString() === assignedTo;
         if(isAdmin && isMemberLeader){
-             return res.status(400).json({success: false, message: "User cannot assigned task to the team leader"});
-        }
-        
-        // is Team Admin
-        const isMemberAdmin= team.members.some(member=> member.user.toString() === assignedTo && member.role === 'admin');
-
-        // Admin cannot assign task to another admin
-        if(isAdmin && isMemberAdmin){
-            return res.status(400).json({success: false, message: "Admin cannot assigned task to another admin"});
+             return res.status(403).json({success: false, message: "Admin cannot assign task to the team leader"});
         }
         
         const newTask= new Task({
@@ -58,7 +50,7 @@ const createTask= async (req, res)=>{
 
         await newTask.save();
         await newTask.populate([
-            { path: 'assignedTo', select: 'firstName lastName username profilePicture' },
+            { path: 'assignedTo', select: 'firstName lastName username profilePicture email' },
             { path: 'assignedBy', select: 'firstName lastName username profilePicture' }
         ]);
         
@@ -101,6 +93,7 @@ const getTeamTasks= async (req, res)=>{
             const kanbanBoard= {
                 todo: tasks.filter(t=> t.status === 'todo'),
                 'in-progress': tasks.filter(t=> t.status === 'in-progress'),
+                'in-review': tasks.filter(t=> t.status === 'in-review'),
                 completed: tasks.filter(t=> t.status === 'completed'),
                 cancelled: tasks.filter(t=> t.status === 'cancelled'),
             }
@@ -110,6 +103,7 @@ const getTeamTasks= async (req, res)=>{
                 byStatus: {
                     todo: kanbanBoard.todo.length,
                     inProgress: kanbanBoard['in-progress'].length,
+                    inReview: kanbanBoard['in-review'].length,
                     completed: kanbanBoard.completed.length,
                     cancelled: kanbanBoard.cancelled.length,
                 },
@@ -139,17 +133,19 @@ const getTeamTasks= async (req, res)=>{
                             total: 0,
                             todo: 0,
                             inProgress: 0,
+                            inReview: 0,
                             completed: 0,
                             cancelled: 0
                         },
                     };
+                }
                     taskByMember[memberId].tasks.push(task);
                     taskByMember[memberId].stats.total++;
                     if(task.status === 'todo') taskByMember[memberId].stats.todo++;
                     else if(task.status === 'in-progress') taskByMember[memberId].stats.inProgress++;
+                    else if(task.status === 'in-review') taskByMember[memberId].stats.inReview++;
                     else if(task.status === 'completed') taskByMember[memberId].stats.completed++;
                     else if(task.status === 'cancelled') taskByMember[memberId].stats.cancelled++;
-                }
             })
             return res.status(200).json({success: true, message: "Tasks retrieved successfully", kanbanBoard, stats, taskByMember, allTasks: tasks});
 
@@ -181,6 +177,7 @@ const getMyTasksInTeam= async (req, res)=>{
         const kanbanBoard= {
             todo: tasks.filter(t=> t.status === 'todo'),
             'in-progress': tasks.filter(t=> t.status === 'in-progress'),
+            'in-review': tasks.filter(t=> t.status === 'in-review'),
             completed: tasks.filter(t=> t.status === 'completed'),
             cancelled: tasks.filter(t=> t.status === 'cancelled'),
         }
@@ -190,6 +187,7 @@ const getMyTasksInTeam= async (req, res)=>{
             byStatus: {
                 todo: kanbanBoard.todo.length,
                 inProgress: kanbanBoard['in-progress'].length,
+                inReview: kanbanBoard['in-review'].length,
                 completed: kanbanBoard.completed.length,
                 cancelled: kanbanBoard.cancelled.length,
             },
@@ -218,6 +216,7 @@ const getMyTasks= async (req, res)=>{
         const kanbanBoard= {
             todo: tasks.filter(t=> t.status === 'todo'),
             'in-progress': tasks.filter(t=> t.status === 'in-progress'),
+            'in-review': tasks.filter(t=> t.status === 'in-review'),
             completed: tasks.filter(t=> t.status === 'completed'),
             cancelled: tasks.filter(t=> t.status === 'cancelled'),
         }
@@ -227,6 +226,7 @@ const getMyTasks= async (req, res)=>{
             byStatus: {
                     todo: kanbanBoard.todo.length,
                     inProgress: kanbanBoard['in-progress'].length,
+                    inReview: kanbanBoard['in-review'].length,
                     completed: kanbanBoard.completed.length,
                     cancelled: kanbanBoard.cancelled.length,
                 },
@@ -252,7 +252,7 @@ const updateTaskStatus= async (req, res)=>{
         const {taskId}= req.params;
         const {status}= req.body;
 
-        if(!['todo', 'in-progress', 'completed', 'cancelled'].includes(status)){
+        if(!['todo', 'in-progress', 'in-review', 'completed', 'cancelled'].includes(status)){
             return res.status(400).json({success: false, message: "Invalid status value"});
         }
 
@@ -271,7 +271,7 @@ const updateTaskStatus= async (req, res)=>{
         }
 
         task.status= status;
-        task.updatedAt= new Date.now();
+        task.updatedAt= new Date();
         if(status === 'completed'){
             task.completedAt= new Date();
         }
@@ -304,7 +304,7 @@ const updateTask= async (req, res)=>{
             return res.status(404).json({ success: false, message: "Team not found" });
         }   
 
-        const isLeader= team.leader.toString()=== userId;
+        const isLeader= team.leader.toString() === userId;
         const isAdmin= team.members.some(m=> m.user.toString() === userId && m.role === 'admin');
 
         if(!isLeader && !isAdmin){
@@ -372,4 +372,123 @@ const deleteTask= async (req, res)=>{
     }
 }
 
-module.exports= {createTask, getTeamTasks, getMyTasksInTeam, getMyTasks, updateTaskStatus, updateTask, deleteTask};
+// User Progress Report for each member in a team
+const getTeamMemberProgress= async (req, res)=>{
+    try{
+        const userId= req.userId;
+        const {teamId}= req.params;
+
+        const team= await Team.findById(teamId).populate('leader', 'firstName lastName username profilePicture').populate('members.user', 'firstName lastName username profilePicture');
+        if(!team){
+            return res.status(404).json({success: false, message: "Team not found"});
+        }
+
+        const isMember= team.members.some(member=> member.user._id.toString() === userId) || team.leader._id.toString() === userId;
+        if(!isMember){
+            return res.status(403).json({success: false, message: "Only team members can view progress reports"});
+        }
+
+        const tasks= await Task.find({team: teamId});
+
+        const now= new Date();
+        const memberProgress= [];
+
+        // Include leader + all members
+        const allUsers= [
+            { user: team.leader, role: 'leader', joinedAt: team.createdAt },
+            ...team.members.map(m=> ({ user: m.user, role: m.role, joinedAt: m.joinedAt }))
+        ];
+
+        // Deduplicate (leader may also be in members array)
+        const seen= new Set();
+
+        for(const entry of allUsers){
+            const uid= entry.user._id.toString();
+            if(seen.has(uid)) continue;
+            seen.add(uid);
+
+            const userTasks= tasks.filter(t=> t.assignedTo.toString() === uid);
+            const total= userTasks.length;
+            const completed= userTasks.filter(t=> t.status === 'completed');
+            const cancelled= userTasks.filter(t=> t.status === 'cancelled');
+            const inProgress= userTasks.filter(t=> t.status === 'in-progress');
+            const inReview= userTasks.filter(t=> t.status === 'in-review');
+            const todo= userTasks.filter(t=> t.status === 'todo');
+            const overdue= userTasks.filter(t=> t.dueDate && new Date(t.dueDate) < now && t.status !== 'completed' && t.status !== 'cancelled');
+
+            // On-time completions: completed before or on dueDate
+            const onTime= completed.filter(t=> t.dueDate && t.completedAt && new Date(t.completedAt) <= new Date(t.dueDate));
+
+            // Average resolution time (days) for completed tasks
+            let avgResolutionDays= 0;
+            if(completed.length > 0){
+                const totalMs= completed.reduce((sum, t)=>{
+                    const start= new Date(t.createdAt);
+                    const end= t.completedAt ? new Date(t.completedAt) : now;
+                    return sum + (end - start);
+                }, 0);
+                avgResolutionDays= Math.round((totalMs / completed.length) / (1000 * 60 * 60 * 24) * 10) / 10;
+            }
+
+            const activeTasks= total - cancelled.length;
+            const completionRate= activeTasks > 0 ? Math.round((completed.length / activeTasks) * 100) : 0;
+            const onTimeRate= completed.length > 0 ? Math.round((onTime.length / completed.length) * 100) : 0;
+
+            memberProgress.push({
+                user: {
+                    _id: entry.user._id,
+                    firstName: entry.user.firstName,
+                    lastName: entry.user.lastName,
+                    username: entry.user.username,
+                    profilePicture: entry.user.profilePicture,
+                },
+                role: entry.role,
+                stats: {
+                    total,
+                    completed: completed.length,
+                    inProgress: inProgress.length,
+                    inReview: inReview.length,
+                    todo: todo.length,
+                    cancelled: cancelled.length,
+                    overdue: overdue.length,
+                    completionRate,
+                    onTimeRate,
+                    avgResolutionDays,
+                },
+                byPriority: {
+                    high: userTasks.filter(t=> t.priority === 'high').length,
+                    medium: userTasks.filter(t=> t.priority === 'medium').length,
+                    low: userTasks.filter(t=> t.priority === 'low').length,
+                },
+            });
+        }
+
+        // Sort by completion rate descending, then by total tasks
+        memberProgress.sort((a, b)=> b.stats.completionRate - a.stats.completionRate || b.stats.total - a.stats.total);
+
+        // Team-wide summary
+        const totalTeamTasks= tasks.length;
+        const totalCompleted= tasks.filter(t=> t.status === 'completed').length;
+        const totalActive= tasks.filter(t=> t.status !== 'cancelled').length;
+        const teamCompletionRate= totalActive > 0 ? Math.round((totalCompleted / totalActive) * 100) : 0;
+        const totalOverdue= tasks.filter(t=> t.dueDate && new Date(t.dueDate) < now && t.status !== 'completed' && t.status !== 'cancelled').length;
+
+        return res.status(200).json({
+            success: true,
+            message: "Progress report retrieved successfully",
+            teamSummary: {
+                totalTasks: totalTeamTasks,
+                completed: totalCompleted,
+                completionRate: teamCompletionRate,
+                overdue: totalOverdue,
+                membersCount: seen.size,
+            },
+            memberProgress,
+        });
+    }catch(error){
+        console.error("Error retrieving progress report:", error);
+        return res.status(500).json({success: false, message: "Server error while retrieving progress report"});
+    }
+}
+
+module.exports= {createTask, getTeamTasks, getMyTasksInTeam, getMyTasks, updateTaskStatus, updateTask, deleteTask, getTeamMemberProgress};

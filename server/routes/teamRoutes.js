@@ -1,7 +1,7 @@
 const express= require('express');
 const teamRouter= express.Router();
 
-const {createTeam, getMyTeams, getTeamDetails, sendTeamInvitation, getTeamInvitations, respondToTeamInvitation, makeUserAdminOrMember, allMembersOfTeam, removeTeamMember, leaveTeam, deleteTeam}= require('../controllers/teamController.js');
+const {createTeam, getMyTeams, getTeamDetails, sendTeamInvitation, getTeamInvitations, respondToTeamInvitation, makeUserAdminOrMember, allMembersOfTeam, removeTeamMember, leaveTeam, deleteTeam, transferLeadership}= require('../controllers/teamController.js');
 
 const {authMiddleware}= require('../midllewares/authMiddleware.js');
 
@@ -13,6 +13,7 @@ teamRouter.get('/invitations/all', authMiddleware, getTeamInvitations);
 teamRouter.put('/invitations/respond/:invitationId', authMiddleware, respondToTeamInvitation);
 teamRouter.put('/:teamId/change-role/:memberId', authMiddleware, makeUserAdminOrMember);
 teamRouter.get('/all-members/:teamId', authMiddleware, allMembersOfTeam);
+teamRouter.put('/:teamId/transfer-leadership/:memberId', authMiddleware, transferLeadership);
 teamRouter.delete('/:teamId/remove/:memberId', authMiddleware, removeTeamMember);
 teamRouter.delete('/:teamId/leave', authMiddleware, leaveTeam);
 teamRouter.delete('/:teamId', authMiddleware, deleteTeam);

@@ -390,4 +390,53 @@ const deleteTeam =async (req, res)=>{
     }
 }
 
-module.exports= {createTeam, getMyTeams, getTeamDetails, sendTeamInvitation, getTeamInvitations, respondToTeamInvitation, makeUserAdminOrMember, allMembersOfTeam, removeTeamMember, leaveTeam, deleteTeam};
+// Transfer leadership to another member (Only current leader can transfer)
+const transferLeadership= async (req, res)=>{
+    try{
+        const userId= req.userId;
+        const {teamId, memberId}= req.params;
+
+        const team= await Team.findById(teamId);
+        if(!team){
+            return res.status(404).json({success: false, message: "Team not found"});
+        }
+
+        const isLeader= team.leader.toString() === userId;
+        if(!isLeader){
+            return res.status(403).json({success: false, message: "Only the current leader can transfer leadership"});
+        }
+
+        if(memberId === userId){
+            return res.status(400).json({success: false, message: "You are already the leader"});
+        }
+
+        const isMember= team.members.some(member=> member.user.toString() === memberId);
+        if(!isMember){
+            return res.status(404).json({success: false, message: "User is not a member of the team"});
+        }
+
+        // Set new leader
+        team.leader= memberId;
+
+        // Make new leader an admin in members array
+        await Team.updateOne(
+            {_id: teamId, 'members.user': memberId},
+            {$set: {'members.$.role': 'admin', 'members.$.updatedAt': Date.now()}}
+        );
+
+        // Ensure old leader stays as admin in members
+        await Team.updateOne(
+            {_id: teamId, 'members.user': userId},
+            {$set: {'members.$.role': 'admin', 'members.$.updatedAt': Date.now()}}
+        );
+
+        await team.save();
+
+        return res.status(200).json({success: true, message: "Leadership transferred successfully"});
+    }catch(error){
+        console.log("Error transferring leadership:", error.message);
+        return res.status(500).json({success: false, message: "An error occurred while transferring leadership"});
+    }
+}
+
+module.exports= {createTeam, getMyTeams, getTeamDetails, sendTeamInvitation, getTeamInvitations, respondToTeamInvitation, makeUserAdminOrMember, allMembersOfTeam, removeTeamMember, leaveTeam, deleteTeam, transferLeadership};

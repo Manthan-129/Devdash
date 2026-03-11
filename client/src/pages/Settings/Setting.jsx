@@ -1,19 +1,13 @@
-import React from 'react'
-import Sidebar from '../../components/SettingComponents/Sidebar'
 import { Outlet } from 'react-router-dom'
+import Sidebar from '../../components/SettingComponents/Sidebar'
 
 const Setting = () => {
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar Component */}
+    <div className="flex h-screen bg-gray-50/80">
       <Sidebar />
-      
-      {/* Main Content Area */}
-      <div className="flex-1 bg-gray-50 overflow-auto">
-        <div className="min-h-full">
-          <Outlet />
-        </div>
-      </div>
+      <main className="flex-1 overflow-y-auto">
+        <Outlet />
+      </main>
     </div>
   )
 }

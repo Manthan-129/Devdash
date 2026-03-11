@@ -1,141 +1,145 @@
-import React, { useContext } from 'react'
-import { useForm } from 'react-hook-form'
-import { AppContext } from '../../context/AppContext'
 import axios from 'axios'
-import {toast} from 'react-toastify'
+import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react'
+import { useContext, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
+import { AppContext } from '../../context/AppContext'
 
 const Security = () => {
 
   const {token , backendUrl}= useContext(AppContext);
 
-  const { register, handleSubmit, formState: { errors }, watch } = useForm();
+  const { register, handleSubmit, formState: { errors }, watch, reset } = useForm();
 
-  const newPassword = watch("newPassword"); // Watch newPassword instead of password
+  const newPassword = watch("newPassword");
+
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data) => {
-    console.log(data);
+    setLoading(true);
     try{
       const response= await axios.post(backendUrl + '/api/auth/update-password', data, {headers: {Authorization: `Bearer ${token}`}});
       if(response.data.success){
-          console.log("Password update successful");
-          toast.success("Password updated successfully");
+          toast.success(response.data.message);
+          reset();
       }else{
-          console.log("Password update failed:", response.data.message);
           toast.error(response.data.message);
       }
     }catch(error){
-        toast.error(error.message);
+        toast.error(error.response?.data?.message || 'Failed to update password');
     }
+    setLoading(false);
   }
   
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        {/* Header */}
-        <div className="p-8 bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-gray-200">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Change Password
-          </h2>
-          <p className="text-gray-600 mt-2">Update your password to keep your account secure.</p>
+    <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
+
+      {/* Page Header */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">Security</h2>
+        <p className="text-sm text-gray-500 mt-1">Update your password to keep your account secure.</p>
+      </div>
+
+      {/* Password Form */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-50">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm">
+            <Lock size={18} className="text-white" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-gray-800">Change Password</h3>
+            <p className="text-xs text-gray-400">Choose a strong password with at least 8 characters.</p>
+          </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
           
           {/* Current Password */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Current Password
-            </label>
-            <input 
-              type="password" 
-              {...register("currentPassword", { required: "Current password is required" })}
-              className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 ${
-                errors.currentPassword 
-                  ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
-                  : 'border-gray-300 focus:border-cyan-500 focus:ring-cyan-200'
-              }`}
-              placeholder="Enter your current password"
-            />
-            {errors.currentPassword && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                {errors.currentPassword.message}
-              </p>
-            )}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Current Password</label>
+            <div className="relative">
+              <input 
+                type={showCurrent ? 'text' : 'password'}
+                {...register("currentPassword", { required: "Current password is required" })}
+                className={`w-full h-11 px-4 pr-11 border rounded-xl bg-gray-50/50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all ${errors.currentPassword ? 'border-red-300' : 'border-gray-200'}`}
+                placeholder="Enter your current password"
+              />
+              <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
+                {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {errors.currentPassword && <p className="text-xs text-red-500 mt-1">{errors.currentPassword.message}</p>}
           </div>
           
           {/* New Password */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              New Password
-            </label>
-            <input 
-              type="password" 
-              {...register("newPassword", { 
-                required: "New password is required",
-                minLength: {
-                  value: 8,
-                  message: "Password must be at least 8 characters"
-                }
-              })}
-              className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 ${
-                errors.newPassword 
-                  ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
-                  : 'border-gray-300 focus:border-cyan-500 focus:ring-cyan-200'
-              }`}
-              placeholder="Enter your new password"
-            />
-            {errors.newPassword && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                {errors.newPassword.message}
-              </p>
-            )}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">New Password</label>
+            <div className="relative">
+              <input 
+                type={showNew ? 'text' : 'password'}
+                {...register("newPassword", { 
+                  required: "New password is required",
+                  minLength: { value: 8, message: "Password must be at least 8 characters" }
+                })}
+                className={`w-full h-11 px-4 pr-11 border rounded-xl bg-gray-50/50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all ${errors.newPassword ? 'border-red-300' : 'border-gray-200'}`}
+                placeholder="Enter your new password"
+              />
+              <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
+                {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {errors.newPassword && <p className="text-xs text-red-500 mt-1">{errors.newPassword.message}</p>}
           </div>
 
           {/* Confirm Password */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Confirm New Password
-            </label>
-            <input 
-              type="password" 
-              {...register("confirmPassword", { 
-                required: "Please confirm your password", 
-                validate: value => value === newPassword || "Passwords do not match"
-              })}
-              className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 ${
-                errors.confirmPassword 
-                  ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
-                  : 'border-gray-300 focus:border-cyan-500 focus:ring-cyan-200'
-              }`}
-              placeholder="Confirm your new password"
-            />
-            {errors.confirmPassword && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                {errors.confirmPassword.message}
-              </p>
-            )}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Confirm New Password</label>
+            <div className="relative">
+              <input 
+                type={showConfirm ? 'text' : 'password'}
+                {...register("confirmPassword", { 
+                  required: "Please confirm your password", 
+                  validate: value => value === newPassword || "Passwords do not match"
+                })}
+                className={`w-full h-11 px-4 pr-11 border rounded-xl bg-gray-50/50 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all ${errors.confirmPassword ? 'border-red-300' : 'border-gray-200'}`}
+                placeholder="Confirm your new password"
+              />
+              <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
+                {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {errors.confirmPassword && <p className="text-xs text-red-500 mt-1">{errors.confirmPassword.message}</p>}
           </div>
 
-          {/* Submit Button */}
-          <div className="pt-4">
+          {/* Submit */}
+          <div className="pt-2">
             <button 
               type="submit"
-              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold py-4 px-6 rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-blue-300"
+              disabled={loading}
+              className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-xl hover:shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 cursor-pointer"
             >
-              Update Password
+              {loading ? 'Updating...' : 'Update Password'}
             </button>
           </div>
         </form>
+      </div>
+
+      {/* Security Info Card */}
+      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-100 p-5 flex items-start gap-4">
+        <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+          <ShieldCheck size={18} className="text-emerald-600" />
+        </div>
+        <div>
+          <h4 className="text-sm font-bold text-gray-800 mb-1">Security Tips</h4>
+          <ul className="text-xs text-gray-500 space-y-1">
+            <li>• Use a mix of uppercase, lowercase, numbers, and symbols</li>
+            <li>• Avoid reusing passwords across multiple sites</li>
+            <li>• Change your password regularly for better security</li>
+          </ul>
+        </div>
       </div>
     </div>
   )
